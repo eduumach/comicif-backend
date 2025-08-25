@@ -44,31 +44,22 @@ python manage.py runserver
 
 ## API Endpoints
 
-### Fundos Disponíveis
-- **GET** `/api/backgrounds/`
-- Retorna lista de fundos disponíveis
-
-### Poses Disponíveis  
-- **GET** `/api/poses/`
-- Retorna lista de poses disponíveis
+### Backgrounds e Poses Disponíveis
+- **GET** `/api/available-options/`
+- Retorna lista de backgrounds e poses disponíveis
 
 ### Processamento de Fotos
 - **POST** `/api/process-photo/`
-  - Form data: `photo` (arquivo), `background` (string), `method` (string, opcional)
+  - Form data: `photo` (arquivo), `background` (string)
   - Retorna imagem processada
 
 - **POST** `/api/process-photo-base64/`
-  - JSON: `photo_base64` (string), `background` (string), `method` (string, opcional)
+  - JSON: `photo_base64` (string), `background` (string)
   - Retorna JSON com imagem em base64
 
 ### Outros
 - **GET** `/` - Informações da API
 - **GET** `/api/health/` - Health check
-
-## Métodos de Processamento
-
-- `grabcut` (padrão): Usa algoritmo GrabCut para remoção de fundo
-- `simple`: Usa detecção de cor dominante nas bordas
 
 ## Fundos Disponíveis
 

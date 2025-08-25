@@ -1,0 +1,141 @@
+### Comicif Backend API Tests
+### Base URL: http://localhost:8000
+
+### 1. Health Check
+GET http://localhost:8000/api/health/
+
+###
+
+### 2. API Root
+GET http://localhost:8000/
+
+###
+
+### 3. Get Available Options (Backgrounds and Poses)
+GET http://localhost:8000/api/available-options/
+
+###
+
+### 4. Process Photo (File Upload) - Always uses rembg
+POST http://localhost:8000/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="photo"; filename="test1.png"
+Content-Type: image/png
+
+< ./test1.png
+--boundary
+Content-Disposition: form-data; name="background"
+
+space
+--boundary--
+
+###
+
+### 5. Process Photo Base64 (JSON) - Always uses rembg
+POST http://localhost:8000/api/process-photo-base64/
+Content-Type: application/json
+
+{
+    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "background": "beach"
+}
+
+###
+
+### 6. Process Photo - Spiderman Theme
+POST http://localhost:8000/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="photo"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./person-photo.jpg
+--boundary
+Content-Disposition: form-data; name="background"
+
+spiderman_building
+--boundary--
+
+###
+
+### 7. Process Photo - Dragon Ball Theme  
+POST http://localhost:8000/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="photo"; filename="person.jpg"
+Content-Type: image/jpeg
+
+< ./person-photo.jpg
+--boundary
+Content-Disposition: form-data; name="background"
+
+goku_clouds
+--boundary--
+
+###
+
+### 8. Process Photo - Forest Background
+POST http://localhost:8000/api/process-photo-base64/
+Content-Type: application/json
+
+{
+    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "background": "forest"
+}
+
+###
+
+### 9. Process Photo - Space Background
+POST http://localhost:8000/api/process-photo-base64/
+Content-Type: application/json
+
+{
+    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "background": "space"
+}
+
+###
+
+### 10. Error Test - Invalid Background
+POST http://localhost:8000/api/process-photo-base64/
+Content-Type: application/json
+
+{
+    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "background": "invalid_background"
+}
+
+###
+
+### 11. Error Test - Missing Photo
+POST http://localhost:8000/api/process-photo-base64/
+Content-Type: application/json
+
+{
+    "background": "forest"
+}
+
+###
+
+### Variables for different environments
+### Development
+# @baseUrl = http://localhost:8000
+
+### Production  
+# @baseUrl = https://your-production-url.com
+
+### Available backgrounds:
+# - spiderman_building: Prédio da cidade (estilo Homem-Aranha)
+# - goku_clouds: Nuvens no céu (estilo Dragon Ball)  
+# - space: Espaço sideral
+# - beach: Praia tropical
+# - forest: Floresta mística
+
+### Background removal:
+# - Always uses rembg (AI-powered background removal)
+# - No need to specify method parameter - it's automatic
+# - High quality results with transparent backgrounds

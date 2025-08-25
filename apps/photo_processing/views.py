@@ -24,7 +24,6 @@ def process_photo(request):
     
     photo = request.FILES['photo']
     background = request.data.get('background')
-    method = request.data.get('method', 'grabcut')
     
     if not photo.content_type.startswith("image/"):
         return Response(
@@ -38,16 +37,11 @@ def process_photo(request):
             "error": f"Fundo inválido. Disponíveis: {list(available_backgrounds.keys())}"
         }, status=400)
     
-    if method not in ["grabcut", "simple"]:
-        return Response({
-            "error": "Método deve ser 'grabcut' ou 'simple'"
-        }, status=400)
-    
     try:
         photo_data = photo.read()
         
         result_bytes = photo_processor.process_photo(
-            photo_data, background, method
+            photo_data, background
         )
         
         response = HttpResponse(
@@ -63,6 +57,26 @@ def process_photo(request):
         }, status=500)
 
 
+@api_view(['GET'])
+def get_available_options(request):
+    """
+    Retorna lista de opções disponíveis (fundos e poses)
+    """
+    try:
+        backgrounds = photo_processor.get_available_backgrounds()
+        poses = photo_processor.get_available_poses()
+        
+        return Response({
+            "backgrounds": backgrounds,
+            "poses": poses
+        })
+        
+    except Exception as e:
+        return Response({
+            "error": f"Erro ao obter informações: {str(e)}"
+        }, status=500)
+
+
 @api_view(['POST'])
 def process_photo_base64(request):
     """
@@ -70,7 +84,6 @@ def process_photo_base64(request):
     """
     photo_base64 = request.data.get('photo_base64')
     background = request.data.get('background')
-    method = request.data.get('method', 'grabcut')
     
     if not photo_base64:
         return Response(
@@ -84,24 +97,18 @@ def process_photo_base64(request):
             "error": f"Fundo inválido. Disponíveis: {list(available_backgrounds.keys())}"
         }, status=400)
     
-    if method not in ["grabcut", "simple"]:
-        return Response({
-            "error": "Método deve ser 'grabcut' ou 'simple'"
-        }, status=400)
-    
     try:
         photo_data = base64.b64decode(photo_base64)
         
         result_bytes = photo_processor.process_photo(
-            photo_data, background, method
+            photo_data, background
         )
         
         result_base64 = base64.b64encode(result_bytes).decode('utf-8')
         
         return Response({
             "result_image": result_base64,
-            "background_used": background,
-            "method_used": method
+            "background_used": background
         })
         
     except Exception as e:

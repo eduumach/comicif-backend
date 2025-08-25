@@ -101,3 +101,7 @@ temp/
 *.bak
 *.backup
 *.old
+
+# Test Image
+test.jpg
+test1.png
