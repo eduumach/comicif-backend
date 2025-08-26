@@ -1,5 +1,5 @@
 # Multi-stage build for optimized production image
-FROM python:3.12-slim as builder
+FROM python:3.12-slim-buster as builder
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -34,7 +34,8 @@ ENV PYTHONUNBUFFERED=1 \
 # Install system dependencies for runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
-    libgl1-mesa-dri \
+    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
