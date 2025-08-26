@@ -29,5 +29,9 @@ RUN mkdir -p staticfiles logs
 
 EXPOSE 8000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8000/ || exit 1
+
 # Start command
 CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 4 config.wsgi:application"]
