@@ -50,7 +50,6 @@ ENV/
 
 # UV package manager
 .uv/
-uv.lock
 
 # IDE
 .vscode/
