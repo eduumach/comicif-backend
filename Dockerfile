@@ -14,10 +14,11 @@ RUN pip install poetry
 
 COPY pyproject.toml poetry.lock* ./
 
-RUN poetry install --no-root --only main
+RUN poetry config virtualenvs.in-project true
+RUN poetry install --only main --no-interaction
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput
+RUN poetry run python manage.py collectstatic --noinput
 
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 4 config.wsgi:application"]
+CMD ["sh", "-c", "poetry run python manage.py migrate && poetry run gunicorn --bind 0.0.0.0:8000 --workers 4 config.wsgi:application"]

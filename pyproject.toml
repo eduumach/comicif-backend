@@ -3,8 +3,9 @@ name = "comicif-backend"
 version = "0.1.0"
 description = "Django backend for comic-style photo processing with background replacement"
 readme = "README.md"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Eduardo M. Rezende"]
 packages = [{include = "apps"}, {include = "config"}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "3.12.*"
