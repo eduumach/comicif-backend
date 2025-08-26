@@ -3,7 +3,7 @@
 @baseUrl = http://localhost:8000
 
 ### Production  
-# @baseUrl = https://your-production-url.com
+# @baseUrl = https://api.comicif.rifeeh.com
 
 
 ### 1. Health Check
