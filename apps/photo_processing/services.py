@@ -1,6 +1,6 @@
 import rembg
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 import io
 import os
 from django.conf import settings
@@ -52,19 +52,54 @@ class PhotoBackgroundChanger:
             logging.error(f"Error in rembg background removal: {e}")
             raise
 
-    def compose_images(self, person_rgba: np.ndarray, background_image: np.ndarray) -> np.ndarray:
+    def smooth_alpha_edges(self, alpha_channel: np.ndarray, blur_radius: float = 2.0, feather_size: int = 3) -> np.ndarray:
         """
-        Compõe a imagem da pessoa (com transparência) com o fundo
+        Suaviza as bordas do canal alpha para uma composição mais suave
+        """
+        alpha_pil = Image.fromarray((alpha_channel * 255).astype(np.uint8).squeeze())
+        
+        blurred = alpha_pil.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+        
+        smoothed_alpha = np.array(blurred).astype(np.float32) / 255.0
+        
+        if feather_size > 0:
+            from scipy.ndimage import binary_erosion, gaussian_filter
+            try:
+                eroded = binary_erosion(smoothed_alpha > 0.5, iterations=feather_size)
+                feathered = gaussian_filter(eroded.astype(np.float32), sigma=feather_size/2)
+                smoothed_alpha = np.minimum(smoothed_alpha, feathered)
+            except ImportError:
+                pass
+        
+        return np.expand_dims(smoothed_alpha, axis=2)
+
+    def compose_images(self, person_rgba: np.ndarray, background_image: np.ndarray, smooth_edges: bool = True) -> np.ndarray:
+        """
+        Compõe a imagem da pessoa (com transparência) com o fundo usando técnicas avançadas de suavização
         """
         person_h, person_w = person_rgba.shape[:2]
         background_resized = background_image.resize((person_w, person_h))
         background_array = np.array(background_resized)
         
-        # Extrair canal alpha (transparência)
         alpha = person_rgba[:, :, 3:4] / 255.0
-        person_rgb = person_rgba[:, :, :3]
+        person_rgb = person_rgba[:, :, :3].copy().astype(np.float32)
         
-        # Composição usando alpha blending
+        if smooth_edges:
+            alpha = self.smooth_alpha_edges(alpha, blur_radius=2.5, feather_size=2)
+            
+            background_mean_color = np.mean(background_array, axis=(0, 1))
+            edge_mask = (alpha > 0.1) & (alpha < 0.9) 
+            
+            if np.any(edge_mask):
+                color_correction_strength = 0.1 
+                for channel in range(3):
+                    person_rgb[:, :, channel] = np.where(
+                        edge_mask.squeeze(),
+                        person_rgb[:, :, channel] * (1 - color_correction_strength) + 
+                        background_mean_color[channel] * color_correction_strength,
+                        person_rgb[:, :, channel]
+                    )
+        
         result = person_rgb * alpha + background_array * (1 - alpha)
         
         return result.astype(np.uint8)
