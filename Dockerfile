@@ -13,14 +13,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv for faster dependency resolution
-RUN pip install uv
+# Install poetry for dependency management
+RUN pip install poetry
+
+# Configure poetry to not create virtual environment
+ENV POETRY_VENV_IN_PROJECT=false \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
-RUN uv pip install --system --no-deps -r pyproject.toml
+RUN poetry config virtualenvs.create false \
+    && poetry install --only=main --no-root \
+    && rm -rf /tmp/poetry_cache
 
 # Production stage
 FROM python:3.12-slim
