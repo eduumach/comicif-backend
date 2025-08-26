@@ -12,8 +12,8 @@ class PhotoBackgroundChanger:
         self.backgrounds = {
             "spiderman_building": "assets/backgrounds/building.jpg",
             "goku_clouds": "assets/backgrounds/clouds.jpg",
-            "space": "assets/backgrounds/space.jpg",
-            "beach": "assets/backgrounds/beach.jpg",
+            "space": "assets/backgrounds/space.webp",
+            "beach": "assets/backgrounds/beach.jpeg",
             "forest": "assets/backgrounds/forest.jpg"
         }
         
@@ -42,10 +42,11 @@ class PhotoBackgroundChanger:
 
     def remove_background(self, image_array: np.ndarray) -> np.ndarray:
         """
-        Remove background using rembg
+        Remove background using rembg with u2net_human_seg model
         """
         try:
-            output_array = rembg.remove(image_array)
+            session = rembg.new_session(model_name="u2net_human_seg")
+            output_array = rembg.remove(image_array, session=session)
             return output_array
         except Exception as e:
             logging.error(f"Error in rembg background removal: {e}")

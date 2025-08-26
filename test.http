@@ -1,30 +1,35 @@
 ### Comicif Backend API Tests
-### Base URL: http://localhost:8000
+### Development
+@baseUrl = http://localhost:8000
+
+### Production  
+# @baseUrl = https://your-production-url.com
+
 
 ### 1. Health Check
-GET http://localhost:8000/api/health/
+GET {{baseUrl}}/api/health/
 
 ###
 
 ### 2. API Root
-GET http://localhost:8000/
+GET {{baseUrl}}/
 
 ###
 
 ### 3. Get Available Options (Backgrounds and Poses)
-GET http://localhost:8000/api/available-options/
+GET {{baseUrl}}/api/available-options/
 
 ###
 
 ### 4. Process Photo (File Upload) - Always uses rembg
-POST http://localhost:8000/api/process-photo/
+POST {{baseUrl}}/api/process-photo/
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
-Content-Disposition: form-data; name="photo"; filename="test1.png"
-Content-Type: image/png
+Content-Disposition: form-data; name="photo"; filename="test1.jpg"
+Content-Type: image/jpg
 
-< ./test1.png
+< ./miranha.jpg
 --boundary
 Content-Disposition: form-data; name="background"
 
@@ -34,7 +39,7 @@ space
 ###
 
 ### 5. Process Photo Base64 (JSON) - Always uses rembg
-POST http://localhost:8000/api/process-photo-base64/
+POST {{baseUrl}}/api/process-photo-base64/
 Content-Type: application/json
 
 {
@@ -45,14 +50,14 @@ Content-Type: application/json
 ###
 
 ### 6. Process Photo - Spiderman Theme
-POST http://localhost:8000/api/process-photo/
+POST {{baseUrl}}/api/process-photo/
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
 Content-Disposition: form-data; name="photo"; filename="test.jpg"
 Content-Type: image/jpeg
 
-< ./person-photo.jpg
+< ./miranha.jpg
 --boundary
 Content-Disposition: form-data; name="background"
 
@@ -61,15 +66,15 @@ spiderman_building
 
 ###
 
-### 7. Process Photo - Dragon Ball Theme  
-POST http://localhost:8000/api/process-photo/
+### 7. Process Photo - Dragon Ball Theme
+POST {{baseUrl}}/api/process-photo/
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
 Content-Disposition: form-data; name="photo"; filename="person.jpg"
 Content-Type: image/jpeg
 
-< ./person-photo.jpg
+< ./miranha.jpg
 --boundary
 Content-Disposition: form-data; name="background"
 
@@ -78,64 +83,49 @@ goku_clouds
 
 ###
 
-### 8. Process Photo - Forest Background
-POST http://localhost:8000/api/process-photo-base64/
-Content-Type: application/json
+### 8. Process Photo - Space Background
+POST {{baseUrl}}/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
 
-{
-    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    "background": "forest"
-}
+--boundary
+Content-Disposition: form-data; name="photo"; filename="person.jpg"
+Content-Type: image/jpeg
 
-###
+< ./miranha.jpg
+--boundary
+Content-Disposition: form-data; name="background"
 
-### 9. Process Photo - Space Background
-POST http://localhost:8000/api/process-photo-base64/
-Content-Type: application/json
+space
+--boundary--
 
-{
-    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    "background": "space"
-}
+### 9. Process Photo - Beach Background
+POST {{baseUrl}}/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
 
-###
+--boundary
+Content-Disposition: form-data; name="photo"; filename="person.jpg"
+Content-Type: image/jpeg
 
-### 10. Error Test - Invalid Background
-POST http://localhost:8000/api/process-photo-base64/
-Content-Type: application/json
+< ./miranha.jpg
+--boundary
+Content-Disposition: form-data; name="background"
 
-{
-    "photo_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    "background": "invalid_background"
-}
-
-###
-
-### 11. Error Test - Missing Photo
-POST http://localhost:8000/api/process-photo-base64/
-Content-Type: application/json
-
-{
-    "background": "forest"
-}
+beach
+--boundary--
 
 ###
 
-### Variables for different environments
-### Development
-# @baseUrl = http://localhost:8000
+### 10. Process Photo - Forest Background
+POST {{baseUrl}}/api/process-photo/
+Content-Type: multipart/form-data; boundary=boundary
 
-### Production  
-# @baseUrl = https://your-production-url.com
+--boundary
+Content-Disposition: form-data; name="photo"; filename="person.jpg"
+Content-Type: image/jpeg
 
-### Available backgrounds:
-# - spiderman_building: Prédio da cidade (estilo Homem-Aranha)
-# - goku_clouds: Nuvens no céu (estilo Dragon Ball)  
-# - space: Espaço sideral
-# - beach: Praia tropical
-# - forest: Floresta mística
+< ./miranha.jpg
+--boundary
+Content-Disposition: form-data; name="background"
 
-### Background removal:
-# - Always uses rembg (AI-powered background removal)
-# - No need to specify method parameter - it's automatic
-# - High quality results with transparent backgrounds
+forest
+--boundary--
