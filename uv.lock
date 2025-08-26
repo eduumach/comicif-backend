@@ -116,6 +116,7 @@ dependencies = [
     { name = "rembg" },
     { name = "requests" },
     { name = "sqlparse" },
+    { name = "urllib3" },
 ]
 
 [package.metadata]
@@ -131,6 +132,7 @@ requires-dist = [
     { name = "rembg", specifier = ">=2.0.67" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "sqlparse", specifier = ">=0.5.3" },
+    { name = "urllib3", specifier = ">=2.5.0" },
 ]
 
 [[package]]
