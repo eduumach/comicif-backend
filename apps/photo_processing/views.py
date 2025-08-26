@@ -4,7 +4,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import base64
+import logging
 from .services import PhotoBackgroundChanger
+
+logger = logging.getLogger(__name__)
 
 
 photo_processor = PhotoBackgroundChanger()
@@ -15,8 +18,9 @@ photo_processor = PhotoBackgroundChanger()
 def process_photo(request):
     """
     Processa a foto: remove o fundo e compõe com o fundo escolhido
-    """
+    """    
     if 'photo' not in request.FILES:
+        logger.error("Erro: Foto não encontrada na requisição")
         return Response(
             {"error": "Foto é obrigatória"}, 
             status=400

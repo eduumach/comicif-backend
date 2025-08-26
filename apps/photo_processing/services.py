@@ -1,10 +1,14 @@
 import rembg
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageFile
 import io
 import os
 from django.conf import settings
 import logging
+from transformers import pipeline
+
+logger = logging.getLogger(__name__)
+classifier = pipeline("image-classification", model="Falconsai/nsfw_image_detection")
 
 
 class PhotoBackgroundChanger:
@@ -49,7 +53,7 @@ class PhotoBackgroundChanger:
             output_array = rembg.remove(image_array, session=session)
             return output_array
         except Exception as e:
-            logging.error(f"Error in rembg background removal: {e}")
+            logger.error(f"Error in rembg background removal: {e}")
             raise
 
     def smooth_alpha_edges(self, alpha_channel: np.ndarray, blur_radius: float = 2.0, feather_size: int = 3) -> np.ndarray:
@@ -109,8 +113,11 @@ class PhotoBackgroundChanger:
         Processa a foto completa: remove fundo e compõe com novo fundo
         """
         person_pil = Image.open(io.BytesIO(person_image_data))
+        if self.is_nsfw(person_pil):
+            logger.warning("Imagem NSFW detectada.")
+            return b""
         person_array = np.array(person_pil.convert('RGB'))
-        
+
         # Remove background using rembg
         person_rgba_array = self.remove_background(person_array)
         
@@ -154,6 +161,17 @@ class PhotoBackgroundChanger:
         background = Image.new('RGB', (width, height), color)
         
         return background
+
+    def is_nsfw(self,image: ImageFile, threshold: float = 0.5) -> bool:
+        """
+        Retorna True se a imagem for considerada NSFW (pornográfica/sexual).
+        threshold = confiança mínima para classificar como NSFW.
+        """
+        results = classifier(image)
+
+        nsfw_score = next((r["score"] for r in results if r["label"] == "nsfw"), 0.0)
+
+        return nsfw_score >= threshold
 
     def get_available_backgrounds(self):
         """
