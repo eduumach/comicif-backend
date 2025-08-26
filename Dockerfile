@@ -1,5 +1,5 @@
 # Multi-stage build for optimized production image
-FROM python:3.12-slim-buster as builder
+FROM python:3.12-slim as builder
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
