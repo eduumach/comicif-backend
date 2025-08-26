@@ -1,24 +1,57 @@
+# Use Python 3.12 slim as base image
 FROM python:3.12-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     build-essential \
-    libpq-dev \
+    libopencv-dev \
+    python3-opencv \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Poetry
 RUN pip install poetry
 
-COPY pyproject.toml poetry.lock* ./
+# Set work directory
+WORKDIR /app
 
-RUN poetry config virtualenvs.in-project true
-RUN poetry install --only main --no-interaction
+# Copy Poetry files
+COPY pyproject.toml poetry.lock ./
 
+# Configure Poetry and install dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev \
+    && rm -rf /tmp/poetry_cache
+
+# Copy project files
 COPY . .
 
-RUN poetry run python manage.py collectstatic --noinput
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
-CMD ["sh", "-c", "poetry run python manage.py migrate && poetry run gunicorn --bind 0.0.0.0:8000 --workers 4 config.wsgi:application"]
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/admin/login/', timeout=10)" || exit 1
+
+# Run the application
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "config.wsgi:application"]
