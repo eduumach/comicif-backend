@@ -114,6 +114,7 @@ dependencies = [
     { name = "onnxruntime" },
     { name = "pillow" },
     { name = "rembg" },
+    { name = "requests" },
     { name = "sqlparse" },
 ]
 
@@ -128,6 +129,7 @@ requires-dist = [
     { name = "onnxruntime", specifier = ">=1.22.1" },
     { name = "pillow", specifier = ">=11.3.0" },
     { name = "rembg", specifier = ">=2.0.67" },
+    { name = "requests", specifier = ">=2.32.5" },
     { name = "sqlparse", specifier = ">=0.5.3" },
 ]
 
