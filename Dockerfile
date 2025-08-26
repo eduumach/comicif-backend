@@ -81,8 +81,14 @@ RUN python manage.py collectstatic --noinput
 EXPOSE $PORT
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:$PORT/admin/', timeout=10)"
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD python -c "import requests; import sys; \
+try: \
+    response = requests.get('http://localhost:$PORT/admin/', timeout=10); \
+    sys.exit(0 if response.status_code < 500 else 1) \
+except Exception as e: \
+    print(f'Healthcheck failed: {e}'); \
+    sys.exit(1)"
 
 # Start command
 CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:$PORT --workers 4 config.wsgi:application"]
